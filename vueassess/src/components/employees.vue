@@ -4,15 +4,15 @@
   <br>
     <h1>EMPLOYEE DETAILS</h1>
     <br>
-<!-- 
+
   <label for="department">Choose a department</label>
-  <select class="selectHtml"  @change="filterStaffs()"  v-model="departmentNameFilter" >
-    <option class="select" v-for="department in selectDepartmentData" :value="department.department_name" :key="department.department_id">
-          {{ department.department_name}}
+  <select class="selectHtml"  @change="filterEmployees()"  v-model="departmentNameFilter" >
+    <option class="select" v-for="department in selectDepartmentData" :value="department.id" :key="department.id">
+          {{ department.name}}
     </option>
   </select>
  <br><br>
-
+<!-- 
 <table v-if="tableIfValue" id = "filtered"  >
         <tr>
           <th scope="col">staffid</th>
@@ -96,13 +96,14 @@
         </tr>
     </table>
     </div>
-<!-- {{selectDepartmentData}}<br><br>
-{{selectJoinData}} -->
+<!-- {{selectDepartmentData}}<br><br> -->
+{{selectJoinData}}
   </template>
   
 
 <script>
 import axios from "axios";
+import moment from 'moment'
 export default {
   data(){
     return{
@@ -167,14 +168,22 @@ revertTable(i,updateId){
       
       this.name = this.selectJoinData[i].name
       console.log(this.name)
-      this.dob = this.selectJoinData[i].dob
-      this.doj = this.selectJoinData[i].doj
+      const dateOfBirth = moment.utc(this.selectJoinData[i].dob).format('YYYY-MM-DD')
+      console.log(dateOfBirth)
+      this.dob = dateOfBirth
+      const dateOfJoining = moment.utc(this.selectJoinData[i].doj).format('YYYY-MM-DD')
+      this.doj = dateOfJoining
       this.email = this.selectJoinData[i].email
       this.phone = this.selectJoinData[i].phone
-      this.name = this.selectJoinData[i].name
-      this.phone= this.selectJoinData[i].phone
-      this.departmentName= this.selectJoinData[i].department_name
    
+      this.revertData={
+        departmentId: this.selectEmployeeData[i].department_id
+      }
+      
+      this.instance.post('/revertTable',this.revertData).then((result) => {
+    this.departmentName = result.data;
+    })
+  
       
       console.log(this.departmentName)
       this.openForm()
@@ -190,9 +199,10 @@ updateTable(updateIndex){
     phone:this.phone,
     dob:this.dob,
     doj:this.doj,
+    email:this.email,
     departmentName:this.departmentName
       }
-      //console.log(this.id)
+      
    this.instance.patch("/updateEmployee", this.updateData).then((result) => {
       this.data = result.data;
       
@@ -267,20 +277,15 @@ deleteId(deleteEmployeeId){
       this.email="",
       this.departmentName = "";
     },
-
-//     filterStaffs(){
-
-//       this.filterData={
-//         departmentName: this.departmentNameFilter
-//       }
-      
-//       this.instance.post('/filterStaffs',this.filterData).then((result) => {
-//       this.selectFilteredData = result.data;
-//       this.tableIfValue = true
-//       console.log(this.selectFilteredData)
-
-//    })
-//     }
+  async filterEmployees(){
+  alert("in func")
+   const listData =  await this.instance.get("/selectEmployee")
+   alert(listData.data)
+   this.selectJoinData = listData.data.filter(result =>
+         {
+             return  result.department_id == this.departmentNameFilter;
+        })
+    }
   
 } 
 }

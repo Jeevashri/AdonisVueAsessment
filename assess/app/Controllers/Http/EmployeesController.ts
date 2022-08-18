@@ -121,9 +121,9 @@ export default class EmployeesController {
 
      const departmentName = (await Database
       .from('departments')
-      .where('department_id', request.input('departmentId')))
+      .where('id', request.input('departmentId')))
       console.log(departmentName)
-      const departIdName = departmentName[0].department_name
+      const departIdName = departmentName[0].name
       console.log(departIdName)
       return departIdName
 

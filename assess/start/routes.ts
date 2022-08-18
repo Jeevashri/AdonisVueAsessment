@@ -40,7 +40,6 @@ Route.group(()=>{
   Route.delete('deleteEmployee','EmployeesController.delete')
   Route.patch('updateEmployee','EmployeesController.update')
   Route.get('joins','EmployeesController.joins')
-  // Route.post('filterStaffs','EmployeesController.filterStaffs')
   Route.post('revertTable','EmployeesController.revertTable')
   })
   
