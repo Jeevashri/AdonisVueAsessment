@@ -1,4 +1,4 @@
-// import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database';
 import User from 'App/Models/Employee'
 import EmployeeValidator from 'App/Validators/EmployeeValidator';
@@ -6,21 +6,24 @@ import EmployeeValidator from 'App/Validators/EmployeeValidator';
 
 export default class EmployeesController {
 
-    public async insert({request}){
-        await request.validate(EmployeeValidator)
+    public async insert({request}:HttpContextContract){
+        const result = await request.validate(EmployeeValidator)
          try{    
              const user = new User()
        
-            user.id = request.input('id')
-            user.name = request.input('name')
             user.dob= request.input('dob')
             user.doj = request.input('doj')
-            user.email= request.input('email')
-            user.phone = request.input('phone')
-            user.department_id = request.input('departmentName')
+            user.name = result.name
+            // user.dob= result.dob
+            // user.doj = result.doj
+            user.email= result.email
+            user.phone = BigInt(result.phone)
+            
+            user.department_id = result.departmentName
        
-        
-           return await user.save()
+            user.save()
+            
+           return "Inserted"
         
        }
         catch(err){
@@ -35,7 +38,7 @@ export default class EmployeesController {
             return user;
         }
 
-        public async delete({request}) {
+        public async delete({request}:HttpContextContract) {
             try{
             console.log(request.input('departmentId'))
             const deleteId = await User.findOrFail(request.input('departmentId'))
@@ -47,29 +50,18 @@ export default class EmployeesController {
             }     
     }
           
-        public async update({request}){
-
+        public async update({request}:HttpContextContract){
+            const result = await request.validate(EmployeeValidator)
                 try{
-                    // console.log(request.input("phone"))
-                    // console.log(request.input("name"))
-                    // console.log(request.input("id"))
-                const  updateId= await User.findOrFail(request.input('id'))
-            
-                updateId.name = request.input('name')
+            const  updateId= await User.findOrFail(request.input('id'))
+                updateId.name = result.name
                 updateId.dob= request.input('dob')
                 updateId.doj = request.input('doj')
-                updateId.email= request.input('email')
-                updateId.phone = request.input('phone')
-                updateId.department_id = request.input('departmentName')
-           
+                updateId.email= result.email  
+                updateId.phone = BigInt(result.phone)
+                updateId.department_id = result.departmentName
 
-
-                // const departmentName = request.input('departmentName')
-
-                // const departmentId = await Database
-                // .rawQuery('select department_id from departments where department_name = ?', [departmentName])
-                // // console.log(departmentId)
-                // updateId.department_id = departmentId[0][0].department_id  
+            
                 return updateId.save()
                 
                 }
@@ -94,9 +86,7 @@ export default class EmployeesController {
                                         .select("employees.department_id")
                                         .select("employees.created_at")
                                         .select("employees.updated_at")
-                                        // .select("employees.*")
-                                        
-                                        // console.log(join)
+                                    
         return join
     }
   
@@ -115,21 +105,7 @@ export default class EmployeesController {
     //   return filteredData;
     
     // }
-
-
-    public async revertTable({request}){
-
-     const departmentName = (await Database
-      .from('departments')
-      .where('id', request.input('departmentId')))
-      console.log(departmentName)
-      const departIdName = departmentName[0].name
-      console.log(departIdName)
-      return departIdName
-
-    }
-
-
-
     
 }
+
+

@@ -1,4 +1,4 @@
-import { DateTime } from 'luxon'
+import { DateTime, DateTimeJSOptions } from 'luxon'
 import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
 
 export default class Employee extends BaseModel {
@@ -9,10 +9,10 @@ export default class Employee extends BaseModel {
   public name: string
 
   @column()
-  public dob: Date
+  public dob: DateTime
 
   @column()
-  public doj: Date
+  public doj: DateTime
 
   @column()
   public email: string

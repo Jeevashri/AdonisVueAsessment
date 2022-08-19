@@ -1,31 +1,23 @@
 <template >
-
-<div>
+<div class="test">
   <br>
     <h1>EMPLOYEE DETAILS</h1>
     <br>
-
   <label for="department">Choose a department</label>
   <select class="selectHtml"  @change="filterEmployees()"  v-model="departmentNameFilter" >
     <option class="select" v-for="department in selectDepartmentData" :value="department.id" :key="department.id">
           {{ department.name}}
     </option>
   </select>
+   <select class="selectHtml"  @change="orderByAscDes()" v-model ="orderByValues" >
+    <option class="select"  value = "ascending">
+        order by ascending
+    </option>
+     <option class="select" value = "descending" >
+        order by descending
+    </option>
+  </select>
  <br><br>
-<!-- 
-<table v-if="tableIfValue" id = "filtered"  >
-        <tr>
-          <th scope="col">staffid</th>
-          <th scope="col">Name</th>
-          <th scope="col">phone</th>  
-        </tr>
-        <tr v-for="(entry, i) in selectFilteredData" :key="i">
-         <td>{{ entry.id }}</td>
-          <td>{{ entry.name }}</td>
-          <td>{{ entry.phone }}</td>
-        </tr>
-</table>
-<br><br> -->
 
     <button class="open-button" @click="openForm()" >Open Form</button>
     <div   class="form-popup" id="myForm">
@@ -43,21 +35,16 @@
         <br>
         <input type="tel" placeholder="Enter your phone number " v-model="phone" ><br><br>
         <label class= "labelCss" for="department">Choose a department:</label>
-        <select  v-if="updateButton==true" class="selectHtml" v-model="departmentName">
-                <option class="select" v-for="department in selectDepartmentData" :value="department.id" :key="department.id">
-        {{ department.name}}
-                </option>
-                </select>
-
-          <select v-if="updateButton==false" class="selectHtml" v-model="departmentName">
-                <option class="select" v-for="department in selectDepartmentData" :value="department.id" :key="department.id">
+        <select   class="selectHtml" v-model="departmentName">
+                <option class="select" v-for="department in selectDepartmentData" :value="department.id" :key="department.name">
         {{ department.name}}
                 </option>
         </select>
-         <br><br>
+
+        <br><br>
         
-        <button v-if="updateButton==true" type="submit" class="btn" @click="insert()" >SUBMIT</button><br><br>
-        <button v-if="updateButton==false" type="submit" @click="updateTable(updateIndex)" class="btn btn-dark" >Update </button>
+        <button v-if="updateButton" type="submit" class="btn" @click="insert()" >SUBMIT</button>
+        <button v-else type="submit" @click="updateTable(updateIndex)" class="btn btn-dark" >Update </button>
 
         <button type="button" class="btn cancel" @click="closeForm()">Close</button>
         <br>
@@ -87,17 +74,17 @@
           <td>{{ entry.doj}}</td>
           <td>{{ entry.email}}</td>
           <td>{{ entry.phone}}</td>
-          <td>{{ entry.department_id}}</td>
+          <td >{{ entry.department_id}}</td>
+          <!-- <td>{{entry.deparame}}</td> -->
           <td>{{ entry.created_at}}</td>
           <td>{{ entry.updated_at}}</td>
         
           <td><button @click='deleteId(entry.id)' >Delete</button></td>
-          <td><button @click='revertTable(i,entry.id)' >Edit</button></td> 
+          <td><button @click='populateTable(i,entry.id)' >Edit</button></td> 
         </tr>
     </table>
     </div>
-<!-- {{selectDepartmentData}}<br><br> -->
-{{selectJoinData}}
+
   </template>
   
 
@@ -123,10 +110,10 @@ export default {
     doj:"",
     email:"",
     departmentName:"",
+    department_id:'',
     myForm:"",
     updateButton:true,
     updateIndex:"",
-    updateData:"",
     tableIfValue:false
       
   }},
@@ -145,7 +132,7 @@ export default {
 
  })
       
-       this.instance.get('/joins').then((result) => {
+  this.instance.get('/joins').then((result) => {
       this.selectJoinData = result.data;  })   
 
 },
@@ -154,7 +141,7 @@ methods:{
 
 select(){
    this.instance.get('/selectEmployee').then((result) => {
-      this.selectStaffData = result.data;
+      this.selectEmployeeData = result.data;
 
    })
 },
@@ -164,28 +151,16 @@ joins(){
       this.selectJoinData = result.data;  })   },
 
 
-revertTable(i,updateId){
+populateTable(i,updateId){
       
       this.name = this.selectJoinData[i].name
-      console.log(this.name)
       const dateOfBirth = moment.utc(this.selectJoinData[i].dob).format('YYYY-MM-DD')
-      console.log(dateOfBirth)
       this.dob = dateOfBirth
       const dateOfJoining = moment.utc(this.selectJoinData[i].doj).format('YYYY-MM-DD')
       this.doj = dateOfJoining
       this.email = this.selectJoinData[i].email
-      this.phone = this.selectJoinData[i].phone
-   
-      this.revertData={
-        departmentId: this.selectEmployeeData[i].department_id
-      }
-      
-      this.instance.post('/revertTable',this.revertData).then((result) => {
-    this.departmentName = result.data;
-    })
-  
-      
-      console.log(this.departmentName)
+      this.phone = String(this.selectJoinData[i].phone)
+      this.departmentName = this.selectJoinData[i].department_id
       this.openForm()
       this.updateButton = false
       this.updateIndex = updateId  
@@ -204,21 +179,18 @@ updateTable(updateIndex){
       }
       
    this.instance.patch("/updateEmployee", this.updateData).then((result) => {
-      this.data = result.data;
-      
+   this.updateData = result.data;
    this.updateButton = true
    this.clearForm()
-   this.select()
    this.joins()
-    })
-  
+    
+   })
 },
 deleteId(deleteEmployeeId){
      
      console.log(deleteEmployeeId)
     this.instance.delete("/deleteEmployee" ,{ data: { departmentId : deleteEmployeeId} }).then((result) => {
       this.deleteData = result.data;
-    //    this.select()
        this.joins()
     })
 },
@@ -230,20 +202,22 @@ deleteId(deleteEmployeeId){
     doj: this.doj,
    email: this.email,
    phone: this.phone,
-   departmentName  : this.departmentName
+   departmentName : this.departmentName
       }
 
       if(/^[A-Za-z]+[A-Za-z ]*$/.test(this.name)){
           if((/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(this.email))){
               if(/^[6-9]\d{9}$/.test(this.phone)){
                     if(this.departmentName!= ""){
+                           
                            this.instance.post('/insertEmployee',this.formData).then((result) => {
-                           this.insertData = result.data;
+                           this.selectEmployeeData = result.data;                       
                            this.clearForm();
                            this.select() 
                            this.joins()
-                                     })
-                             }
+                                     
+                           })
+                           }
                     else{
                         alert("choose the department")
                         }
@@ -271,32 +245,45 @@ deleteId(deleteEmployeeId){
 },
   clearForm() {
       this.name = "";
-      this.phone = "";
       this.dob="",
       this.doj="",
       this.email="",
+       this.phone = "",
       this.departmentName = "";
     },
   async filterEmployees(){
-  alert("in func")
+ 
    const listData =  await this.instance.get("/selectEmployee")
-   alert(listData.data)
    this.selectJoinData = listData.data.filter(result =>
          {
              return  result.department_id == this.departmentNameFilter;
         })
-    }
-  
+ 
+    },
+     async orderByAscDes(){
+      if(this.orderByValues == "descending"){
+         
+         const ascending  = await this.selectJoinData.reverse()
+         this.selectJoinData = ascending
+         }
+        if(this.orderByValues == "ascending"){
+           this.instance.get('/joins').then((result) => {
+               this.selectJoinData = result.data;  }) 
+         }
+         
 } 
+
+}
 }
 
 </script>
 <style>
 
-	/* div{
-
-       justify-content: center;
-    }  */
+	.test{
+   
+  width:50%
+  
+  } 
 
 .labelCss{
 
@@ -320,8 +307,9 @@ button {
     margin-right: 1000px; */
   font-family: Arial, Helvetica, sans-serif;
   border-collapse:calc() ;
-  margin-top:100px;
-  margin-right: 400px;
+  margin-top:40px;
+  margin-left:1px;
+  margin-right:1px;
 
   align-self: center;
   
@@ -336,6 +324,7 @@ button {
 
 #customers td, #customers th,#filtered tr,#filtered th {
   border: 1px solid #ddd;
+
   padding: 8px;
    font-size: 20px;
    text-align: center;
@@ -347,6 +336,7 @@ button {
   padding-bottom: 12px;
   font-size: 20px;
   text-align: left;
+  margin-left:10px;
   background-color: #04AA6D;
   color: white;
 }

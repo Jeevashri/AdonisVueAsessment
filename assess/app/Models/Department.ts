@@ -8,9 +8,9 @@ export default class Department extends BaseModel {
   @column()
   public name: string
 
-  @column.dateTime({ autoCreate: true })
+  @column.date({ autoCreate: true })
   public createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.date({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
 }

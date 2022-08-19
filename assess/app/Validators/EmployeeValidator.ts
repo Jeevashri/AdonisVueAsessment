@@ -29,12 +29,10 @@ export default class EmployeeValidator {
  
     name : schema.string([ rules.alpha({allow : ['space']})]),
     dob: schema.date(),
-    doj:schema.date(),
-    email: schema.string([
-      rules.email()
-    ]),
+    doj: schema.date(),
+    email: schema.string([rules.email()]),
     phone: schema.string([ rules.mobile({ locale : ['en-IN']}) ]),
-    // departmentId : schema.number([ rules.exists({table : 'staff', column : 'department_id'}) ])
+    departmentName: schema.number()
 
 
   })

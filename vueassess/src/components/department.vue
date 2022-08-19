@@ -7,8 +7,8 @@
         <input type="text" placeholder="Enter the department name " v-model="departmentName" >
         <br>
         
-        <button v-if="updateButton==true" type="submit" class="btn" @click="insert()" >SUBMIT</button><br><br>
-        <button v-if="updateButton==false" type="submit" @click="updateTable(updateIndex)" class="btn btn-dark" >Update </button>
+        <button v-if="updateButton==true" type="submit" class="btn" @click="insert()" >SUBMIT</button>
+        <button v-else type="submit" @click="updateTable(updateIndex)" class="btn btn-dark" >Update </button>
 
         <button type="button" class="btn cancel" @click="closeForm()">Close</button>
         <br>
@@ -26,7 +26,7 @@
          <td>{{ entry.id }}</td>
          <td>{{ entry.name }}</td>
          <td><button @click='deleteId(entry.id)' >Delete</button></td>
-         <td><button @click='revertTable(i,entry.id)' >Edit</button></td> 
+         <td><button @click='populateTable(i,entry.id)' >Edit</button></td> 
         </tr>
     </table>
 
@@ -67,8 +67,6 @@ export default {
      this.selectDepartmentData.sort(compareName)
 
       function compareName(a, b) {
-
-    
     const name1 = a.name.toUpperCase();
     const name2 = b.name.toUpperCase();
 
@@ -111,7 +109,7 @@ select(){
    })
 },
 
-revertTable(i,updateId){
+populateTable(i,updateId){
       
       this.departmentName = this.selectDepartmentData[i].name
       this.openForm()
@@ -125,10 +123,8 @@ updateTable(updateIndex){
     departmentId : updateIndex,
     departmentName:this.departmentName
       }
-     // console.log(this.id)
    this.instance.patch("/updateDepartment", this.updateData).then((result) => {
-   this.data = result.data;
-      
+   this.data = result.data;   
    this.updateButton = true
    this.clearForm()
    this.select()
@@ -143,7 +139,6 @@ deleteId(deleteDepartmentId){
        this.select()
     })
 },
-
 
    insert() {
 
