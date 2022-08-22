@@ -1,0 +1,17 @@
+CREATE TRIGGER triggerInsert
+AFTER INSERT
+ON employees
+FOR EACH ROW
+INSERT INTO logs(action,performed_at) VALUES("Data inserted", now());
+
+CREATE TRIGGER triggerUpdate
+AFTER UPDATE
+ON employees
+FOR EACH ROW
+INSERT INTO logs(action,performed_at) VALUES("Data updated", now());
+
+CREATE TRIGGER triggerDelete
+AFTER DELETE
+ON employees
+FOR EACH ROW
+INSERT INTO logs(action,performed_at) VALUES("Data deleted", now());
